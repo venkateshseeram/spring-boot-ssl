@@ -2,6 +2,7 @@ package com.mkyong;
 
 
 
+import okhttp3.Dispatcher;
 import okhttp3.OkHttpClient;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.asynchttpclient.AsyncHttpClient;
@@ -82,13 +83,19 @@ public class AyancHttpConfig {
         final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
 
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
-        builder.sslSocketFactory(sslSocketFactory, (X509TrustManager)trustAllCerts[0]);
+        builder.sslSocketFactory(sslSocketFactory, (X509TrustManager) trustManager);
         builder.hostnameVerifier(new HostnameVerifier() {
             @Override
             public boolean verify(String hostname, SSLSession session) {
                 return true;
             }
         });
+        Dispatcher dispatcher=new Dispatcher();
+        dispatcher.setMaxRequests(100);
+        dispatcher.setMaxRequestsPerHost(100);
+
+        builder.dispatcher(dispatcher);
+
 
         OkHttpClient okHttpClient = builder.build();
         return okHttpClient;

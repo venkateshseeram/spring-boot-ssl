@@ -3,6 +3,7 @@ package com.mkyong;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.mkyong.exception.CustomException;
+import com.mkyong.okhttp.OkhttpHelper;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -28,6 +29,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.sql.PreparedStatement;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 
@@ -35,7 +38,7 @@ import java.util.concurrent.ExecutionException;
 public class StartApplication {
 
 
-    public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
+    public static void main(String[] args) throws IOException, ExecutionException, InterruptedException, ClassNotFoundException {
         ConfigurableApplicationContext context = SpringApplication.run(StartApplication.class, args);
 
 
@@ -51,16 +54,13 @@ public class StartApplication {
               return null;
        });*/
 
-        OkHttpClient okhttp = context.getBean(OkHttpClient.class);
+        OkhttpHelper helper = context.getBean(OkhttpHelper.class);
 
-        Request request = new Request.Builder()
-                .url("https://localhost:8443/hello")
-                .addHeader("auth","can")
-                .build();
 
-        Response response = okhttp.newCall(request).execute();
+         helper.get("https://localhost:8443/hello2", new HashMap<String, String>(), JsonObject.class).thenAccept(response->System.out.println(response.toString()));
+         helper.get("https://localhost:8443/hello", new HashMap<String, String>(), JsonObject.class).thenAccept(response->System.out.println(response.toString()));
 
-        System.out.println(response.code());
+
 
 
     }
