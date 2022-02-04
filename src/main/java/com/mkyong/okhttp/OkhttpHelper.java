@@ -25,6 +25,8 @@ public class OkhttpHelper{
     Gson gson = new Gson();
 
 
+
+
     @Autowired
     public OkhttpHelper(OkHttpClient okHttpClient) {
         this.okHttpClient = okHttpClient;
@@ -54,6 +56,8 @@ public class OkhttpHelper{
         return new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
+
+                // log failure
 
             }
 

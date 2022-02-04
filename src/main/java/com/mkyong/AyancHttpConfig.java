@@ -3,12 +3,17 @@ package com.mkyong;
 
 
 import okhttp3.Dispatcher;
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
+import okhttp3.Response;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.DefaultAsyncHttpClient;
 import org.asynchttpclient.DefaultAsyncHttpClientConfig;
 import org.asynchttpclient.netty.ssl.JsseSslEngineFactory;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,6 +39,8 @@ public class AyancHttpConfig {
 
     @Value("${trust-store}")
     private Resource trustStore;
+
+    Logger logger=LoggerFactory.getLogger(AsyncHttpClient.class);
 
 
     @Bean
@@ -96,8 +103,26 @@ public class AyancHttpConfig {
 
         builder.dispatcher(dispatcher);
 
+        builder.addInterceptor(new Interceptor() {
+            @NotNull
+            @Override
+            public Response intercept(@NotNull Chain chain) throws IOException {
+
+
+                logger.info("reqiest received",chain.request());
+
+
+
+
+
+                return chain.proceed(chain.request());
+            }
+        });
 
         OkHttpClient okHttpClient = builder.build();
+
+
+
         return okHttpClient;
 
 
