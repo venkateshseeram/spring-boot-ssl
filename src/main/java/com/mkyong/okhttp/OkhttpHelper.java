@@ -35,41 +35,15 @@ public class OkhttpHelper{
 
     public <T> CompletableFuture<T> get(String baseurl, HashMap<String, String> headers, Class<T> responseClass) throws ClassNotFoundException {
 
-        CompletableFuture<T> future=new CompletableFuture();
 
-        HttpUrl url=HttpUrl.parse(baseurl).newBuilder()
-                .addQueryParameter("name","venky").build();
+       CustomCallBack<T> customCallBack=new CustomCallBack<>(responseClass);
 
         Request request=new Request.Builder()
-                .url(url)
+                .url(baseurl)
                 .build();
 
-         okHttpClient.newCall(request).enqueue(getCallback(responseClass,future));
+         okHttpClient.newCall(request).enqueue(customCallBack);
 
-
-        return future;
-
-    }
-
-    private <T> Callback getCallback(Class<T> clazz,CompletableFuture<T> future) {
-
-        return new Callback() {
-            @Override
-            public void onFailure(@NotNull Call call, @NotNull IOException e) {
-
-                // log failure
-
-            }
-
-            @Override
-            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-
-
-                T res = gson.fromJson(response.body().string(), clazz);
-
-                future.complete(res);
-
-            }
-        };
+         return customCallBack.future;
     }
 }

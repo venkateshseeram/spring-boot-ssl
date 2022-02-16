@@ -1,6 +1,7 @@
 package com.mkyong;
 
 
+import com.mkyong.exception.ApiError;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,16 +26,16 @@ public class RestResponseEntityExceptionHandler
 
 
 
-   /*     if(exception instanceof HttpException){
+        if(exception instanceof HttpException){
 
             HttpException httpException= (HttpException) exception;
 
-            return handleExceptionInternal(httpException, httpException.response().errorBody().string(),
-                    new HttpHeaders(), HttpStatus.valueOf(httpException.code()), request);
+            ApiError apiError=new ApiError(HttpStatus.resolve(httpException.code()),httpException.getMessage());
+
+            return new ResponseEntity<>(apiError,HttpStatus.resolve(httpException.code()));
 
 
-        }*/
-
+        }
 
         return handleExceptionInternal(exception, bodyOfResponse,new HttpHeaders(), HttpStatus.CONFLICT, request);
     }

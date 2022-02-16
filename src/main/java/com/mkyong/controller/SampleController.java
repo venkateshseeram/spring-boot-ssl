@@ -8,13 +8,22 @@ import com.mkyong.okhttp.UserService;
 import com.mkyong.okhttp.retrofit.CustomCallBack;
 import com.mkyong.okhttp.retrofit.RetrofitHelper;
 import com.mkyong.okhttp.retrofit.User;
+import lombok.ToString;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.layout.LoggerFields;
+import org.apache.logging.log4j.core.util.KeyValuePair;
+import org.apache.logging.log4j.message.MapMessage;
+import org.apache.logging.log4j.message.StringMapMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.concurrent.CompletionStage;
 
 @RestController
@@ -24,6 +33,8 @@ public class SampleController {
 
     @Autowired
     RetrofitHelper retrofitHelper;
+
+    Logger logger= LogManager.getLogger(SampleController.class);
 
     @GetMapping("/hello")
     @TestAnnotation("hello guru")
@@ -54,26 +65,36 @@ public class SampleController {
 
     }
 
-    @GetMapping("/user")
-    public CompletionStage<ResponseEntity<User>> index3() throws InterruptedException {
+    @GetMapping("/user/{id}")
+    public CompletionStage<User> index3(@PathVariable String id) throws InterruptedException {
+
+        System.out.println(Thread.currentThread().getName());
 
 
         UserService userService=retrofitHelper.getRetrofit("https://gorest.co.in/").create(UserService.class);
 
         CustomCallBack<User> customCallBack=new CustomCallBack<>();
 
-        userService.getUser("200343").enqueue(customCallBack);
+        userService.getUser(id).enqueue(customCallBack);
 
-        return customCallBack.future.thenApply(user->new ResponseEntity<User>(user,HttpStatus.OK));
+        User user=customCallBack.getFuture().toCompletableFuture().join();
+
+
+
+        return customCallBack.getFuture();
 
 
     }
 
+}
 
+@ToString
+class LogObject{
+    public LogObject() {
+        this.attributes = new HashMap<>();
+    }
 
-
-
-
+     HashMap<String, Object> attributes;
 
 
 }

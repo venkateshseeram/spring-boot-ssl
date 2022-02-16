@@ -20,10 +20,6 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
         try {
 
 
-         /*   if(request.getHeader("auth").equals("dont")){
-                throw new RuntimeException("unauthorized");
-            }*/
-
             filterChain.doFilter(request, response);
 
 

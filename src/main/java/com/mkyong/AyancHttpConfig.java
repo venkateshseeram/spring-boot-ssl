@@ -1,11 +1,13 @@
 package com.mkyong;
 
 
-
 import okhttp3.Dispatcher;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
+import okhttp3.tls.Certificates;
+import okhttp3.tls.HandshakeCertificates;
+import org.apache.commons.io.FileUtils;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.DefaultAsyncHttpClient;
@@ -25,22 +27,28 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+
 import okhttp3.HttpUrl.Builder;
 
 @Configuration
 public class AyancHttpConfig {
 
 
+
+
     @Value("${trust-store}")
     private Resource trustStore;
 
-    Logger logger=LoggerFactory.getLogger(AsyncHttpClient.class);
+    Logger logger = LoggerFactory.getLogger(AsyncHttpClient.class);
 
 
     @Bean
@@ -50,8 +58,8 @@ public class AyancHttpConfig {
                 .loadTrustMaterial(trustStore.getURL(), "secret".toCharArray())
                 .build();
 
-        AsyncHttpClient asyncHttpClient=new DefaultAsyncHttpClient(new DefaultAsyncHttpClientConfig
-                                                                           .Builder()
+        AsyncHttpClient asyncHttpClient = new DefaultAsyncHttpClient(new DefaultAsyncHttpClientConfig
+                .Builder()
                 .setSslEngineFactory(new JsseSslEngineFactory(sslContext))
                 .setReadTimeout(5000)
                 .build());
@@ -60,13 +68,11 @@ public class AyancHttpConfig {
         return asyncHttpClient;
 
     }
+// thrust all;
 
-
-    @Bean
     public OkHttpClient getOkHttpClient() throws NoSuchAlgorithmException, KeyManagementException {
 
-
-        TrustManager trustManager=new X509TrustManager() {
+        TrustManager trustManager = new X509TrustManager() {
             @Override
             public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
 
@@ -82,7 +88,7 @@ public class AyancHttpConfig {
                 return new X509Certificate[0];
             }
         };
-        TrustManager[] trustAllCerts=new TrustManager[]{trustManager};
+        TrustManager[] trustAllCerts = new TrustManager[]{trustManager};
 
         final SSLContext sslContext = SSLContext.getInstance("SSL");
         sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
@@ -97,7 +103,7 @@ public class AyancHttpConfig {
                 return true;
             }
         });
-        Dispatcher dispatcher=new Dispatcher();
+        Dispatcher dispatcher = new Dispatcher();
         dispatcher.setMaxRequests(100);
         dispatcher.setMaxRequestsPerHost(100);
 
@@ -109,10 +115,7 @@ public class AyancHttpConfig {
             public Response intercept(@NotNull Chain chain) throws IOException {
 
 
-                logger.info("reqiest received",chain.request());
-
-
-
+                logger.info("reqiest received {}z", chain.request());
 
 
                 return chain.proceed(chain.request());
@@ -120,16 +123,38 @@ public class AyancHttpConfig {
         });
 
         OkHttpClient okHttpClient = builder.build();
-
-
-
         return okHttpClient;
 
+    }
+    //add required certificate
+
+    @Bean
+    public OkHttpClient okHttpClient() throws NoSuchAlgorithmException, KeyManagementException, IOException {
 
 
+        File file = new File("src/main/resources/badssl-com.pem");
+        String str = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
 
+        X509Certificate letsEncryptCertificateAuthority= Certificates.decodeCertificatePem(str);
+
+        HandshakeCertificates certificates = new HandshakeCertificates.Builder()
+                .addTrustedCertificate(letsEncryptCertificateAuthority)
+                .build();
+
+        return new OkHttpClient.Builder()
+               .sslSocketFactory(certificates.sslSocketFactory(), certificates.trustManager())
+                .build();
 
     }
+
+
+
+
+
+
+
+
+
 
 
 

@@ -10,10 +10,14 @@ import java.util.concurrent.CompletableFuture;
 public class CustomCallBack<T> implements Callback<T> {
 
 
-    public CompletableFuture<T> future;
+    private CompletableFuture<T> future;
 
     public CustomCallBack() {
         this.future = new CompletableFuture<>();
+    }
+
+    public CompletableFuture<T> getFuture() {
+        return future;
     }
 
     @Override

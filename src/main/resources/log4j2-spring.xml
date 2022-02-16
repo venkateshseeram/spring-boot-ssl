@@ -1,0 +1,22 @@
+<Configuration status="DEBUG">
+    <Appenders>
+        <Console name="LogToConsole" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d %r [%t] %-5p [%c{1.}] %X - %m %throwable%n"/>
+        </Console>
+        <RollingFile name="LogToRollingFile" fileName="./logs/app.log"
+                     filePattern="./logs/app-%d{MM-dd-yyyy}-%i.log">
+            <EcsLayout serviceName="my-app"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+            </Policies>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="LogToConsole"/>
+            <AppenderRef ref="LogToRollingFile"/>
+        </Root>
+    </Loggers>
+</Configuration>
